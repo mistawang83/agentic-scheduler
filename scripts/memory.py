@@ -1,6 +1,8 @@
 import sqlite3
+import os
 
-
+if not os.path.exists("storage"):
+    os.makedirs("storage")
 
 conn = sqlite3.connect("storage/memory.db") 
 cursor = conn.cursor()

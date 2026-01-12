@@ -4,7 +4,7 @@ from agents.mcp import MCPServerStdio
 from agent.manager import manager_agent
 from agent.scheduler import scheduler_agent
 from agent.fetcher import fetcher_agent
-from agent.memory import save_message, load_conversation
+from scripts.memory import save_message, load_conversation
 import os
 import asyncio
 import gradio as gr
@@ -30,8 +30,7 @@ playwright_mcp_params = {
     "command": "npx",
     "args": [
         "@playwright/mcp@latest",
-        "--isolated",
-        "--storage-state={./playwright/brightspace_state.json}",
+        "--storage-state=playwright/brightspace_state.json",
     ],
 }
 
