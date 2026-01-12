@@ -10,4 +10,5 @@ dependencies = [
     "gradio>=6.2.0",
     "openai>=2.14.0",
     "openai-agents>=0.6.5",
+    "playwright>=1.57.0",
 ]

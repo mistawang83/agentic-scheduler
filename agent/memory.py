@@ -1,5 +1,7 @@
 import sqlite3
 
+
+
 conn = sqlite3.connect("storage/memory.db") 
 cursor = conn.cursor()
 

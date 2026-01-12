@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 from agents import Agent, Runner, trace
 import os
 from agent.prompts import get_manager_instructions
+from agent.scheduler import scheduler_agent
+
 
 load_dotenv(override=True)
 
