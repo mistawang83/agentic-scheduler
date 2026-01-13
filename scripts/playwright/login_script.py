@@ -1,6 +1,10 @@
 from playwright.sync_api import sync_playwright
+import os
 
-STATE_FILE = "playwright/brightspace_state.json"
+STATE_FILE = "storage/playwright_auth.json"
+
+if not os.path.exists("storage"):
+    os.makedirs("storage")
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)

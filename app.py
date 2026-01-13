@@ -30,7 +30,9 @@ playwright_mcp_params = {
     "command": "npx",
     "args": [
         "@playwright/mcp@latest",
-        "--storage-state=playwright/brightspace_state.json",
+        "--isolated",
+        "--storage-state=storage/playwright_auth.json",
+        "--viewport-size=1280x720"
     ],
 }
 
@@ -100,7 +102,7 @@ class App:
         request += "## This is the new user message: \n" + message
         
         with trace("scheduler"):
-            result = await Runner.run(self.manager, request)
+            result = await Runner.run(self.manager, request, max_turns=30)
 
         save_message("user", message)
         save_message("agent", result.final_output)

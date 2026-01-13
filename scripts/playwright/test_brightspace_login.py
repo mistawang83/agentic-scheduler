@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 
 # Path to your storage state JSON
-STORAGE_STATE = "./playwright/brightspace_state.json"
+STORAGE_STATE = "storage/playwright_auth.json"
 
 with sync_playwright() as p:
     # Launch browser (headless=False so you can see it)

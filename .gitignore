@@ -13,7 +13,7 @@ wheels/
 .env
 
 # Memory
-storage/memory.db
+storage/
 
 # Login storage state
 playwright/brightspace_state.json
