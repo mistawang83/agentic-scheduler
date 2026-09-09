@@ -1,7 +1,7 @@
 [project]
 name = "agentic-scheduler"
 version = "0.1.0"
-description = "Add your description here"
+description = "App to fetch university course info and add into google calendar"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

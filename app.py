@@ -8,6 +8,8 @@ from scripts.memory import save_message, load_conversation
 import os
 import asyncio
 import gradio as gr
+import shutil
+from pathlib import Path
 
 load_dotenv(override=True)
 
@@ -18,7 +20,7 @@ google_refresh_token = os.getenv("GOOGLE_REFRESH_TOKEN")
 
 google_mcp_params = {
     "command": "node",
-    "args": ["/Users/Simon Wang/projects/google-workspace-mcp-server/build/index.js"],
+    "args": ["../google-workspace-mcp-server/build/index.js"],
     "env": {
         "GOOGLE_CLIENT_ID": google_client_id,
         "GOOGLE_CLIENT_SECRET": google_client_secret,
@@ -32,7 +34,8 @@ playwright_mcp_params = {
         "@playwright/mcp@latest",
         "--isolated",
         "--storage-state=storage/playwright_auth.json",
-        "--viewport-size=1280x720"
+        "--viewport-size=1280x720",
+        "--output-dir=storage/playwright/"
     ],
 }
 
@@ -45,8 +48,30 @@ class App:
         self.playwright_mcp_server = None
         self.servers_started = False
 
+    def clear_playwright_logs(self, output_dir: str = "storage/playwright/", keep_exts: set[str] = None):
+        """
+        Delete leftover log/session/trace files from the previous run,
+        while optionally preserving real downloaded files (e.g. PDFs).
+        """
+        output_path = Path(output_dir)
+        if not output_path.exists():
+            return
+
+        # Extensions to delete before each run
+        junk_exts = {".yml", ".yaml", ".log", ".zip", ".json"}
+        if keep_exts:
+            junk_exts -= keep_exts
+
+        for item in output_path.iterdir():
+            if item.is_file() and item.suffix.lower() in junk_exts:
+                item.unlink()
+            elif item.is_dir() and item.name.startswith((".playwright-mcp", "trace-", "session")):
+                shutil.rmtree(item, ignore_errors=True)
+
     async def start_servers(self):
-        """Start both MCP servers and keep them running"""
+        """
+        Start both MCP servers and keep them running
+        """
         if self.servers_started:
             return
         
@@ -56,7 +81,10 @@ class App:
             client_session_timeout_seconds=30
         )
         await self.google_mcp_server.__aenter__()
-        
+
+        # Wipe previous session files and logs
+        self.clear_playwright_logs()
+
         # Start Playwright MCP server
         self.playwright_mcp_server = MCPServerStdio(
             params=playwright_mcp_params,
@@ -68,7 +96,7 @@ class App:
         self.scheduler.mcp_servers = [self.google_mcp_server]
         self.fetcher.mcp_servers = [self.playwright_mcp_server]
         scheduler_tool = self.scheduler.as_tool(tool_name="scheduler_agent", tool_description="Create, modify and delete events from the user's Google Calendar")
-        fetcher_tool = self.fetcher.as_tool(tool_name="fetcher_agent", tool_description="Fetch information about the user's university course deliverables and events")
+        fetcher_tool = self.fetcher.as_tool(tool_name="fetcher_agent", tool_description="Fetch information about the user's university course deliverables and events", max_turns=30)
         self.manager.tools = [scheduler_tool, fetcher_tool]
         self.servers_started = True
 

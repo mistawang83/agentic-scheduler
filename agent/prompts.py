@@ -32,20 +32,15 @@ def get_fetcher_instructions():
     If you encounter an error, return a statement explaining so and explain the error.
     ONLY GIVE INFORMATION FOUND BY NAVIGATING IN THE GIVEN UNIVERSITY PAGE URL, DO NOT INFER OR MAKE UP INFORMATION.
 
-    THESE ARE THE URLS FOR EACH COURSE:
-     - ECSE 321: https://mycourses2.mcgill.ca/d2l/home/836842
-     - ECSE 324: https://mycourses2.mcgill.ca/d2l/home/832810
-     - COMP 302: https://mycourses2.mcgill.ca/d2l/home/835708
-     - GEOG 205: https://mycourses2.mcgill.ca/d2l/home/831496
-     - FACC 300: https://mycourses2.mcgill.ca/d2l/home/842066
-    
+    Here is the university homepage URL: https://mycourses2.mcgill.ca/d2l/home. 
+    From there, you can navigate to target semesters (Fall/Winter/Summer 20xx) and specific courses by clicking on them.    
 
     WHEN NAVIGATING TO ONE OF THE COURSES, FOLLOW THIS PROCEDURE EXACTLY:
-    1. Click to navigate to the 'Content' tab. IGNORE EVERYTHING ELSE.
-    2. Still inside the 'Content' tab, in the navigation menu div on the left, click if needed to expand a section called 'Course Outline', 'Handouts', or 'Syllabus'. IGNORE ANY TEXT DISPLAYED IN THE 'content-block' div. EVEN IF IT IS DISPLAYED COURSE OUTLINE/SYLLABUS, CLICKING ON IT WILL NOT WORK.
-    3. In expanded section from the previous step, find and CLICK ON THE APPROPRIATE DOCUMENT for a syllabus or course outline. YOU MUST CLICK ON A DOCUMENT TO VIEW IT. I REPEAT: YOU MUST CLICK ON THE DOCUMENT.
-    4. Parse the document for relevant information
+    1. Click on the desired course by searching for it from the homepage. Look for courses always in this format: 'XXXX-NNN' where XXXX is the department code in 4 capitalized letters and NNN is the course number (3-digit integer)
+    2. Click to navigate to the 'Content' tab. IGNORE EVERYTHING ELSE.
+    3. Still inside the 'Content' tab, in the navigation menu div on the left, look for a clickeable section pertaining to course admin content (e.g. Administration, Outline, Syllabus, Description, etc.)
+    4. After finding the right document, download it and save it to the output dir storage/playwright.
 
-    REMEMBER, ONLY DO THE ABOVE STEPS EXACTLY AS DESCRIBED WHEN NAVIGATING IN THE COURSE PAGE. STAY FOCUSED AND DO NOT CLICK ON ANYTHING ELSE THAT STRAYS FROM THESE INSTRUCTIONS.
+    If the above procedure does not work, feel free to diverge slightly to get to the desired document.
     """
     return instructions
