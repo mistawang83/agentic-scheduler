@@ -1,32 +1,13 @@
-from dotenv import load_dotenv
-from agents import Agent, Runner, trace
-from agents.mcp import MCPServerStdio
-from agent.manager import manager_agent
-from agent.scheduler import scheduler_agent
-from agent.fetcher import fetcher_agent
-from scripts.memory import save_message, load_conversation
-import os
-import asyncio
 import gradio as gr
-import shutil
-from pathlib import Path
+from agents import Runner, trace
+from agents.mcp import MCPServerStdio
 
-load_dotenv(override=True)
+from agentic_scheduler.agent.fetcher import fetcher_agent
+from agentic_scheduler.agent.manager import manager_agent
+from agentic_scheduler.agent.scheduler import scheduler_agent
+from agentic_scheduler.config import google_mcp_params
+from agentic_scheduler.memory import init_db, load_conversation, save_message
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-google_client_id = os.getenv("GOOGLE_CLIENT_ID")
-google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-google_refresh_token = os.getenv("GOOGLE_REFRESH_TOKEN")
-
-google_mcp_params = {
-    "command": "node",
-    "args": ["../google-workspace-mcp-server/build/index.js"],
-    "env": {
-        "GOOGLE_CLIENT_ID": google_client_id,
-        "GOOGLE_CLIENT_SECRET": google_client_secret,
-        "GOOGLE_REFRESH_TOKEN": google_refresh_token,
-    }
-}
 
 class App:
     def __init__(self):
@@ -38,18 +19,18 @@ class App:
 
     async def start_servers(self):
         """
-        Start both MCP servers and keep them running
+        Start the MCP servers and keep them running
         """
         if self.servers_started:
             return
-        
+
         # Start Google MCP server
         self.google_mcp_server = MCPServerStdio(
-            params=google_mcp_params, 
+            params=google_mcp_params(),
             client_session_timeout_seconds=30
         )
         await self.google_mcp_server.__aenter__()
-        
+
         # Set MCP servers on scheduler
         self.scheduler.mcp_servers = [self.google_mcp_server]
 
@@ -59,7 +40,7 @@ class App:
         self.servers_started = True
 
     async def stop_servers(self):
-        """Stop both MCP servers safely"""
+        """Stop the MCP servers safely"""
         if not self.servers_started:
             return
 
@@ -68,12 +49,12 @@ class App:
             self.google_mcp_server = None
 
         self.servers_started = False
-        
+
     async def chat(self, message, history):
         # Ensure servers are started
         if not self.servers_started:
             await self.start_servers()
-        
+
         conversation = load_conversation()
         request = f"""
             # This is the history of the conversation between you and the user.
@@ -82,15 +63,20 @@ class App:
         """
 
         request += "## This is the new user message: \n" + message
-        
+
         with trace("scheduler"):
             result = await Runner.run(self.manager, request, max_turns=30)
 
         save_message("user", message)
         save_message("agent", result.final_output)
         return result.final_output
-        
-if __name__ == "__main__":
+
+
+def main():
+    init_db()
     app = App()
-    # Start servers before launching Gradio
     gr.ChatInterface(app.chat).launch()
+
+
+if __name__ == "__main__":
+    main()

@@ -12,3 +12,10 @@ dependencies = [
     "playwright>=1.57.0",
     "requests>=2.34.2",
 ]
+
+[project.scripts]
+agentic-scheduler = "agentic_scheduler.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

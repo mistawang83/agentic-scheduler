@@ -12,11 +12,8 @@ wheels/
 # Environment variables
 .env
 
-# Memory
-storage/
-
-# Login storage state
-playwright/brightspace_state.json
+# Local data: memory db, auth state, downloads
+data/
 
 # Playwright logs
 .playwright-mcp/
