@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from agents import Agent, Runner, trace
 import os
 from agent.prompts import get_fetcher_instructions
+from agent.tools.fetcher_tools import get_api_versions, get_courses, get_course_content_tree, download_topic_file
 
 load_dotenv(override=True)
 
@@ -12,7 +13,8 @@ def fetcher_agent() -> Agent :
     instructions = get_fetcher_instructions()
     
     return Agent(
-        name="University Course Info Fetcher",
+        name="University Course Page Info Fetcher",
         instructions=instructions,
-        model="gpt-5-nano"
+        model="gpt-5-nano",
+        tools=[get_api_versions, get_courses, get_course_content_tree, download_topic_file]
     )
