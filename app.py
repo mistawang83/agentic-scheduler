@@ -28,45 +28,13 @@ google_mcp_params = {
     }
 }
 
-playwright_mcp_params = {
-    "command": "npx",
-    "args": [
-        "@playwright/mcp@latest",
-        "--isolated",
-        "--storage-state=storage/playwright_auth.json",
-        "--viewport-size=1280x720",
-        "--output-dir=storage/playwright/"
-    ],
-}
-
 class App:
     def __init__(self):
         self.manager = manager_agent()
         self.scheduler = scheduler_agent()
         self.fetcher = fetcher_agent()
         self.google_mcp_server = None
-        self.playwright_mcp_server = None
         self.servers_started = False
-
-    def clear_playwright_logs(self, output_dir: str = "storage/playwright/", keep_exts: set[str] = None):
-        """
-        Delete leftover log/session/trace files from the previous run,
-        while optionally preserving real downloaded files (e.g. PDFs).
-        """
-        output_path = Path(output_dir)
-        if not output_path.exists():
-            return
-
-        # Extensions to delete before each run
-        junk_exts = {".yml", ".yaml", ".log", ".zip", ".json"}
-        if keep_exts:
-            junk_exts -= keep_exts
-
-        for item in output_path.iterdir():
-            if item.is_file() and item.suffix.lower() in junk_exts:
-                item.unlink()
-            elif item.is_dir() and item.name.startswith((".playwright-mcp", "trace-", "session")):
-                shutil.rmtree(item, ignore_errors=True)
 
     async def start_servers(self):
         """
@@ -81,20 +49,10 @@ class App:
             client_session_timeout_seconds=30
         )
         await self.google_mcp_server.__aenter__()
-
-        # Wipe previous session files and logs
-        self.clear_playwright_logs()
-
-        # Start Playwright MCP server
-        self.playwright_mcp_server = MCPServerStdio(
-            params=playwright_mcp_params,
-            client_session_timeout_seconds=30
-        )
-        await self.playwright_mcp_server.__aenter__()
         
         # Set MCP servers on scheduler
         self.scheduler.mcp_servers = [self.google_mcp_server]
-        self.fetcher.mcp_servers = [self.playwright_mcp_server]
+
         scheduler_tool = self.scheduler.as_tool(tool_name="scheduler_agent", tool_description="Create, modify and delete events from the user's Google Calendar")
         fetcher_tool = self.fetcher.as_tool(tool_name="fetcher_agent", tool_description="Fetch information about the user's university course deliverables and events", max_turns=30)
         self.manager.tools = [scheduler_tool, fetcher_tool]
@@ -104,10 +62,6 @@ class App:
         """Stop both MCP servers safely"""
         if not self.servers_started:
             return
-
-        if self.playwright_mcp_server is not None:
-            await self.playwright_mcp_server.__aexit__(None, None, None)
-            self.playwright_mcp_server = None
 
         if self.google_mcp_server is not None:
             await self.google_mcp_server.__aexit__(None, None, None)

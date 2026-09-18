@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 import os
 
-STATE_FILE = "storage/playwright_auth.json"
+STATE_FILE = "storage/d2l_auth.json"
 
 if not os.path.exists("storage"):
     os.makedirs("storage")
